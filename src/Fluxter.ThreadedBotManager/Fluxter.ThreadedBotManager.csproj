@@ -1,9 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Nlog" Version="4.7.10" />
-  </ItemGroup>
+	<PropertyGroup>
+		<PackageId>Fluxter.ThreadedBotManager</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>Marcel Kallen (Fluxter)</Authors>
+		<Company>Fluxter.net</Company>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Nlog" Version="4.7.10" />
+	</ItemGroup>
 </Project>
