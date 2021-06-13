@@ -109,7 +109,7 @@
 
         public void StartAll()
         {
-            this.Logger.Info($"Starting all bots...");
+            this.Logger.Debug($"Starting all bots...");
 
             foreach (var botId in this.GetAllBotIds())
             {
