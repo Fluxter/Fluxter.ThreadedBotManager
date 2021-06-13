@@ -40,6 +40,10 @@
             throw new Exception("Please overwrite this method!");
         }
 
+        protected virtual IEnumerable<string> SendHeartbeat(string botId)
+        {
+        }
+
         private void ResyncAllBots(object state)
         {
             // Find dead threads
@@ -57,6 +61,11 @@
             // Start all missing
             this.StartAll();
             this.StopBotsWithPendingStop();
+
+            foreach(var bot in this.RunningBots)
+            {
+                this.SendHeartbeat(bot.Key);
+            }
         }
 
         public void StopAll()
