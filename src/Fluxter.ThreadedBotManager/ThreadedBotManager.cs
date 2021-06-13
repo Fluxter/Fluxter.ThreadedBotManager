@@ -10,7 +10,7 @@
     {
         private Dictionary<string, Thread> RunningBots { get; } = new Dictionary<string, Thread>();
 
-        public static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+        public Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
         public Timer ResyncAllBotsTimer { get; }
 
@@ -71,10 +71,10 @@
 
         public void Stop(string botId)
         {
-            Logger.Info($"Stopping Bot {botId}");
+            this.Logger.Info($"Stopping Bot {botId}");
             if (!this.RunningBots.ContainsKey(botId))
             {
-                Logger.Warn($"Bot not found {botId}");
+                this.Logger.Warn($"Bot not found {botId}");
                 return;
             }
 
