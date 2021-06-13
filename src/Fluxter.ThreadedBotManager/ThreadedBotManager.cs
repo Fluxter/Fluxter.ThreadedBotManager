@@ -40,7 +40,7 @@
             throw new Exception("Please overwrite this method!");
         }
 
-        protected virtual IEnumerable<string> SendHeartbeat(string botId)
+        protected virtual void SendHeartbeat(string botId)
         {
         }
 
