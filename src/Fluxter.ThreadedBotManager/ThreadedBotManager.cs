@@ -20,8 +20,6 @@
 
         public Action<OnBotStartEventArgs> BotStart;
 
-
-
         public ThreadedBotManager()
         {
             this.ResyncAllBotsTimer = new Timer(new TimerCallback(this.ResyncAllBots), null, 10000, 10000);
@@ -52,6 +50,7 @@
                     continue;
                 }
 
+                this.Logger.Warn($"Thread of bot id {thread.Key} is dead. Stopping it!");
                 this.Stop(thread.Key);
             }
 
@@ -62,8 +61,10 @@
 
         public void StopAll()
         {
+            this.Logger.Info($"Stopping all Bots...");
             foreach (var thread in this.RunningBots)
             {
+                this.Logger.Debug($" - Stopping bot {thread.Key}...");
                 this.Stop(thread.Key);
             }
         }
@@ -76,18 +77,20 @@
                 Logger.Warn($"Bot not found {botId}");
                 return;
             }
+
             var thread = this.RunningBots[botId];
             this.BotStop?.Invoke(new OnBotStopEventArgs(botId));
             if (thread.IsAlive)
             {
                 thread.Interrupt();
             }
+
             this.RunningBots.Remove(botId);
         }
 
         public T Start(string id)
         {
-            Logger.Info($"Starting Bot {id}");
+            this.Logger.Info($"Starting Bot {id}");
 
             var bot = this.GetBotById(id);
             var thread = new Thread(
@@ -106,6 +109,8 @@
 
         public void StartAll()
         {
+            this.Logger.Info($"Starting all bots...");
+
             foreach (var botId in this.GetAllBotIds())
             {
                 if (this.RunningBots.ContainsKey(botId))
@@ -118,9 +123,10 @@
 
         public void StopBotsWithPendingStop()
         {
+            this.Logger.Debug($"Stopping all Bots with pending stop...");
             foreach (var botId in this.GetBotIdsToStop())
             {
-                Logger.Info($"Stopping Bot {botId}");
+                this.Logger.Info($"Stopping Bot {botId}");
 
                 if (this.RunningBots.ContainsKey(botId))
                 {
