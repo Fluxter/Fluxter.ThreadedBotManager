@@ -8,9 +8,9 @@
 
     public abstract class ThreadedBotManager<T> where T : IBot
     {
-        private Dictionary<string, Thread> RunningBots { get; } = new Dictionary<string, Thread>();
+        private Dictionary<string, BotInstance> RunningBots { get; } = new Dictionary<string, BotInstance>();
 
-        public Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+        private Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
         public Timer ResyncAllBotsTimer { get; }
 
@@ -49,7 +49,7 @@
             // Find dead threads
             foreach (var thread in this.RunningBots)
             {
-                if (thread.Value.IsAlive)
+                if (thread.Value.IsRunning)
                 {
                     continue;
                 }
@@ -62,7 +62,7 @@
             this.StartAll();
             this.StopBotsWithPendingStop();
 
-            foreach(var bot in this.RunningBots)
+            foreach (var bot in this.RunningBots)
             {
                 this.SendHeartbeat(bot.Key);
             }
@@ -87,13 +87,15 @@
                 return;
             }
 
-            var thread = this.RunningBots[botId];
-            this.BotStop?.Invoke(new OnBotStopEventArgs(botId));
-            if (thread.IsAlive)
+            var instance = this.RunningBots[botId];
+            instance.Stop();
+            while (instance.IsRunning)
             {
-                thread.Interrupt();
+                this.Logger.Info($"Still Stopping Bot {botId}...");
+                Thread.Sleep(500);
             }
 
+            this.BotStop?.Invoke(new OnBotStopEventArgs(botId));
             this.RunningBots.Remove(botId);
         }
 
@@ -102,15 +104,10 @@
             this.Logger.Info($"Starting Bot {id}");
 
             var bot = this.GetBotById(id);
-            var thread = new Thread(
-                new ParameterizedThreadStart(
-                    (object bot) => ((T)bot).Run()
-                )
-            );
+            var instance = new BotInstance(bot);
+            instance.Start();
 
-            thread.IsBackground = true;
-            thread.Start(bot);
-            this.RunningBots.Add(id, thread);
+            this.RunningBots.Add(id, instance);
             this.BotStart?.Invoke(new OnBotStartEventArgs(bot));
 
             return bot;
