@@ -20,6 +20,8 @@
 
         public Action<OnBotStartEventArgs> BotStart;
 
+        public Action<OnBotExceptionEventArgs> BotException;
+
         public ThreadedBotManager()
         {
             this.ResyncAllBotsTimer = new Timer(new TimerCallback(this.ResyncAllBots), null, 10000, 10000);
@@ -55,6 +57,11 @@
                 }
 
                 this.Logger.Warn($"Thread of bot id {thread.Key} is dead. Stopping it!");
+                if (thread.Value.Exception != null)
+                {
+                    this.Logger.Warn("Thread has been shutdown due to an error: " + thread.Value.Exception.Message);
+                    this.BotException?.Invoke(new OnBotExceptionEventArgs(thread.Key, thread.Value.Exception));
+                }
                 this.Stop(thread.Key);
             }
 
@@ -89,6 +96,7 @@
 
             var instance = this.RunningBots[botId];
             instance.Stop();
+            instance.BotException -= this.OnBotInstanceException;
             while (instance.IsRunning)
             {
                 this.Logger.Info($"Still Stopping Bot {botId}...");
@@ -105,12 +113,20 @@
 
             var bot = this.GetBotById(id);
             var instance = new BotInstance(bot);
+            instance.BotException += this.OnBotInstanceException;
             instance.Start();
 
             this.RunningBots.Add(id, instance);
             this.BotStart?.Invoke(new OnBotStartEventArgs(bot));
 
             return bot;
+        }
+
+        private void OnBotInstanceException(OnBotExceptionEventArgs eventArgs)
+        {
+            this.Logger.Warn($"Bot {eventArgs.BotId} crashed: {eventArgs.Exception.Message}");
+            this.BotException?.Invoke(new OnBotExceptionEventArgs(eventArgs.BotId, eventArgs.Exception));
+            this.Stop(eventArgs.BotId);
         }
 
         public void StartAll()

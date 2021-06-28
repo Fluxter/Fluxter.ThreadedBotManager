@@ -1,26 +1,37 @@
 namespace Fluxter.ThreadedBotManager.Model.EventArgs
 {
-    using System.Threading;
+    using System;
+    using System.Threading.Tasks;
 
     public class BotInstance
     {
         private IBot Bot { get; }
 
-        private Thread Thread { get; set; }
+        private Task Task { get; set; }
+
+        public Action<OnBotExceptionEventArgs> BotException { get; set; }
 
         public BotInstance(IBot bot)
         {
             this.Bot = bot;
         }
 
-        public bool IsRunning => this.Thread.IsAlive;
+        public bool IsRunning => !this.Task.IsCompleted;
+
+        public Exception Exception => this.Task.Exception;
 
         public void Start()
         {
-            this.Thread = new Thread(() => this.Bot.Run());
+            this.Task = new Task(() => this.Bot.Run());
+            this.Task.ContinueWith(this.ExceptionHandler, TaskContinuationOptions.OnlyOnFaulted);
 
-            this.Thread.IsBackground = true;
-            this.Thread.Start();
+            // this.Task.IsBackground = true;
+            this.Task.Start();
+        }
+
+        private void ExceptionHandler(Task task)
+        {
+            this.BotException?.Invoke(new OnBotExceptionEventArgs(this.Bot.BotId, task.Exception));
         }
 
         public void Stop()

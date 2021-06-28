@@ -6,6 +6,9 @@
 		"dockerfile": "Dockerfile",
 		"args": { 
 			"VARIANT": "5.0",
-		}
-	}
+		},
+	},
+	"extensions": [
+		"ms-dotnettools.csharp"
+	]
 }
