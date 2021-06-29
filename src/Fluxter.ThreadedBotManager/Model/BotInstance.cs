@@ -24,7 +24,7 @@ namespace Fluxter.ThreadedBotManager.Model.EventArgs
         {
             this.Task = new Task(async () =>
             {
-                var result = await this.Bot.Run();
+                var result = await this.Bot.RunAsync();
                 if (result != 0)
                 {
                     var eventArgs = new OnBotExceptionEventArgs(this.Bot.BotId, new Exception("Run didnt return 0. Exit Code: " + result));
