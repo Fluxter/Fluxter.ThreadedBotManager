@@ -4,7 +4,7 @@ namespace Fluxter.ThreadedBotManager.Model.EventArgs
     {
         string BotId { get; }
 
-        void Run();
+        Task<int> RunAsync();
 
         void Stop();
     }

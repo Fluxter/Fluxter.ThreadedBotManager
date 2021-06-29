@@ -16,7 +16,7 @@ namespace Fluxter.ThreadedBotManager.TestApp
             this.BotId = id;
         }
 
-        public void Run()
+        public void RunAsync()
         {
             while (this.Running)
             {

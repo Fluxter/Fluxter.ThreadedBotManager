@@ -22,7 +22,15 @@ namespace Fluxter.ThreadedBotManager.Model.EventArgs
 
         public void Start()
         {
-            this.Task = new Task(() => this.Bot.Run());
+            this.Task = new Task(async () =>
+            {
+                var result = await this.Bot.Run();
+                if (result != 0)
+                {
+                    var eventArgs = new OnBotExceptionEventArgs(this.Bot.BotId, new Exception("Run didnt return 0. Exit Code: " + result));
+                    this.BotException?.Invoke(eventArgs);
+                }
+            });
             this.Task.ContinueWith(this.ExceptionHandler, TaskContinuationOptions.OnlyOnFaulted);
 
             // this.Task.IsBackground = true;
