@@ -47,6 +47,10 @@
         {
         }
 
+        protected virtual void UpdateLog(string botId, List<string> logs)
+        {
+        }
+
         private async void ResyncAllBotsAsync(object state)
         {
             // Find dead threads
@@ -54,6 +58,7 @@
             {
                 if (thread.Value.IsRunning)
                 {
+                    this.UpdateLog(thread.Key, thread.Value.Bot.Logs);
                     continue;
                 }
 
