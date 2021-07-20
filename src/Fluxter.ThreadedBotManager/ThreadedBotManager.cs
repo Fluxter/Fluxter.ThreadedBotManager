@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
     using Fluxter.ThreadedBotManager.Model.EventArgs;
     using NLog;
 
@@ -24,7 +25,7 @@
 
         public ThreadedBotManager()
         {
-            this.ResyncAllBotsTimer = new Timer(new TimerCallback(this.ResyncAllBots), null, 10000, 10000);
+            this.ResyncAllBotsTimer = new Timer(new TimerCallback(this.ResyncAllBotsAsync), null, 10000, 10000);
         }
 
         protected virtual T GetBotById(string botId)
@@ -46,7 +47,7 @@
         {
         }
 
-        private void ResyncAllBots(object state)
+        private async void ResyncAllBotsAsync(object state)
         {
             // Find dead threads
             foreach (var thread in this.RunningBots)
@@ -62,12 +63,12 @@
                     this.Logger.Warn("Thread has been shutdown due to an error: " + thread.Value.Exception.Message);
                     this.BotException?.Invoke(new OnBotExceptionEventArgs(thread.Key, thread.Value.Exception));
                 }
-                this.Stop(thread.Key);
+                await this.StopAsync(thread.Key);
             }
 
             // Start all missing
-            this.StartAll();
-            this.StopBotsWithPendingStop();
+            await this.StartAllAsync();
+            await this.StopBotsWithPendingStopAsync();
 
             foreach (var bot in this.RunningBots)
             {
@@ -75,17 +76,17 @@
             }
         }
 
-        public void StopAll()
+        public async Task StopAllAsync()
         {
             this.Logger.Info($"Stopping all Bots...");
             foreach (var thread in this.RunningBots)
             {
                 this.Logger.Debug($" - Stopping bot {thread.Key}...");
-                this.Stop(thread.Key);
+                await this.StopAsync(thread.Key);
             }
         }
 
-        public void Stop(string botId)
+        public async Task StopAsync(string botId)
         {
             this.Logger.Info($"Stopping Bot {botId}");
             if (!this.RunningBots.ContainsKey(botId))
@@ -95,7 +96,7 @@
             }
 
             var instance = this.RunningBots[botId];
-            instance.Stop();
+            await instance.Stop();
             instance.BotException -= this.OnBotInstanceException;
             while (instance.IsRunning)
             {
@@ -107,7 +108,7 @@
             this.RunningBots.Remove(botId);
         }
 
-        public T Start(string id)
+        public async Task<T> StartAsync(string id)
         {
             this.Logger.Info($"Starting Bot {id}");
 
@@ -122,14 +123,13 @@
             return bot;
         }
 
-        private void OnBotInstanceException(OnBotExceptionEventArgs eventArgs)
+        private async Task OnBotInstanceException(OnBotExceptionEventArgs eventArgs)
         {
-            this.Logger.Warn($"Bot {eventArgs.BotId} crashed: {eventArgs.Exception.Message}");
             this.BotException?.Invoke(new OnBotExceptionEventArgs(eventArgs.BotId, eventArgs.Exception));
-            this.Stop(eventArgs.BotId);
+            await this.StopAsync(eventArgs.BotId);
         }
 
-        public void StartAll()
+        public async Task StartAllAsync()
         {
             this.Logger.Debug($"Starting all bots...");
 
@@ -139,11 +139,11 @@
                 {
                     continue;
                 }
-                this.Start(botId);
+                await this.StartAsync(botId);
             }
         }
 
-        public void StopBotsWithPendingStop()
+        public async Task StopBotsWithPendingStopAsync()
         {
             this.Logger.Debug($"Stopping all Bots with pending stop...");
             foreach (var botId in this.GetBotIdsToStop())
@@ -152,7 +152,7 @@
 
                 if (this.RunningBots.ContainsKey(botId))
                 {
-                    this.Stop(botId);
+                    await this.StopAsync(botId);
                 }
 
                 this.BotPendingStopResolved?.Invoke(new OnBotStopEventArgs(botId));

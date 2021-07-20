@@ -8,6 +8,6 @@ namespace Fluxter.ThreadedBotManager.Model.EventArgs
 
         Task<int> RunAsync();
 
-        void Stop();
+        Task StopAsync();
     }
 }
