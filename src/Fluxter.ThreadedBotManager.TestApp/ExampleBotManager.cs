@@ -3,7 +3,7 @@ using NLog;
 
 namespace Fluxter.ThreadedBotManager.TestApp
 {
-    class ExampleBotManager : ThreadedBotManager<ExampleBot>
+    class ExampleBotManager : ThreadedBotManager<ExampleBot>, IThreadedBotManager
     {
         private Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 

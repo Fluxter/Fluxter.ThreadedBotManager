@@ -1,15 +1,21 @@
-﻿using System;
-
-namespace Fluxter.ThreadedBotManager.TestApp
+﻿namespace Fluxter.ThreadedBotManager.TestApp
 {
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.DependencyInjection;
+    using Fluxter.ThreadedBotManager.Model;
+    using System.Threading.Tasks;
+
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var botManager = new ExampleBotManager();
-            botManager.StartAll();
+            var hostBuilder = new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddHostedService<BotService<ExampleBotManager, ExampleBot>>();
+                });
 
-            Console.ReadLine();
+            await hostBuilder.RunConsoleAsync();
         }
     }
 }

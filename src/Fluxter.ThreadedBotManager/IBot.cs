@@ -1,4 +1,4 @@
-namespace Fluxter.ThreadedBotManager.Model.EventArgs
+namespace Fluxter.ThreadedBotManager
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;

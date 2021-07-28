@@ -4,10 +4,11 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Fluxter.ThreadedBotManager.Model;
     using Fluxter.ThreadedBotManager.Model.EventArgs;
     using NLog;
 
-    public abstract class ThreadedBotManager<T> where T : IBot
+    public abstract class ThreadedBotManager<T> : IThreadedBotManager where T : IBot
     {
         private Dictionary<string, BotInstance> RunningBots { get; } = new Dictionary<string, BotInstance>();
 

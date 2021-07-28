@@ -1,8 +1,9 @@
-namespace Fluxter.ThreadedBotManager.Model.EventArgs
+namespace Fluxter.ThreadedBotManager.Model
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Fluxter.ThreadedBotManager.Model.EventArgs;
     using NLog;
 
     public class BotInstance

@@ -1,16 +1,15 @@
 namespace Fluxter.ThreadedBotManager.TestApp
 {
     using System.Threading.Tasks;
+    using Fluxter.ThreadedBotManager.Model;
     using Fluxter.ThreadedBotManager.Model.EventArgs;
     using NLog;
 
-    class ExampleBot : IBot
+    class ExampleBot : BotBase, IBot
     {
         public string BotId { get; }
 
         private bool Running { get; set; } = true;
-
-        private Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
         public ExampleBot(string id)
         {
@@ -21,14 +20,14 @@ namespace Fluxter.ThreadedBotManager.TestApp
         {
             while (this.Running)
             {
-                this.Logger.Debug($"{this.BotId} Running...");
+                this.Log($"{this.BotId} Running...");
                 System.Threading.Thread.Sleep(1000);
             }
 
             return 0;
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             this.Running = false;
         }
